@@ -1,12 +1,12 @@
-# apiVersion: v1
-# kind: ConfigMap
-# metadata: 
-#   name: mariadb-config
-# data: 
-#   MYSQL_DATABASE: example
-#   MYSQL_ROOT_PASSWORD: db-q5n2g
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: mariadb-config
+data: 
+  MYSQL_DATABASE: example
+  MYSQL_ROOT_PASSWORD: db-q5n2g
 
-# ---
+---
 
 apiVersion: v1
 kind: Service
@@ -17,7 +17,6 @@ spec:
     - port: 3306
   selector:
     app: mariadb
-  clusterIP: None
 
 ---
 
@@ -39,22 +38,34 @@ spec:
       containers:
         - image: mariadb:10-focal
           name: mariadb
-          # envFrom:
-          #   - configMapRef:
-          #     name: mariadb-config
           env:
             - name: MYSQL_DATABASE
-              value: example
+              value: example 
             - name: MYSQL_ROOT_PASSWORD
-              value: db-q5n2g # TODO : Transform into file
+              value: db-q5n2g
           ports:
             - containerPort: 3306
               name: mariadb
           volumeMounts:
             - name: mariadb-storage
               mountPath: /var/lib/mysql
+          # args: 
+          #   - --default-authentication-plugin=mysql_native_password
       volumes:
         - name: mariadb-storage
           persistentVolumeClaim:
             claimName: mariadb-claim
-        - name: mariadb-storage-secret
+
+
+# DOESN'T WORK 
+# env:
+#   - name: MYSQL_DATABASE
+#     valueFrom: 
+#       configMapRef:
+#         name: mariadb-config
+#         key: MYSQL_DATABASE
+#   - name: MYSQL_ROOT_PASSWORD
+#     valueFrom: 
+#       configMapRef:
+#         name: mariadb-config
+#         key: MYSQL_ROOT_PASSWORD

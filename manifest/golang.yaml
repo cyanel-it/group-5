@@ -1,3 +1,31 @@
+# Secret
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: db-secret
+stringData:
+  # file with db password to mount on /run/secrets/db-password
+  db-password: |-
+    db-q5n2g
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+
+---
+
 # DEPLOYMENT
 apiVersion: apps/v1
 kind: Deployment
@@ -12,17 +40,25 @@ spec:
       labels:
         app: backend
     spec:
-      volumes:
-        - name: backend-pod-storage
-          hostPath:
-            type: File 
-            path: /db/password.txt
       containers:
       - image: golang-backend:latest
         name: backend
         # command: ["/bin/sh"]
         # args: [ "-c", "while true; do sleep 100000; done"]
         imagePullPolicy: IfNotPresent
+        env: 
+          - name: DATABASE_ADDRESS
+            value: mariadb.default.svc.cluster.local
         volumeMounts:
-          - mountPath: "/var/run/secrets/db-password"
-            name: backend-pod-storage
+          - name: db-secret
+            mountPath: "/var/run/secrets"
+            readOnly: true
+      volumes:
+        - name: db-secret
+          secret:
+            # Provide the name of the ConfigMap you want to mount.
+            secretName: db-secret
+            # An array of keys from the ConfigMap to create as files
+            items:
+            - key: "db-password"
+              path: "db-password"
