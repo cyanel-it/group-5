@@ -8,7 +8,7 @@ data:
       listen       80;
       server_name  localhost;
       location / {
-          proxy_pass          http://backend-service.default.svc.cluster.local:8000;
+          proxy_pass          http://backend-service.default.svc.cluster.local:8000/;
           proxy_http_version  1.1;
       }
     }
@@ -30,26 +30,25 @@ spec:
 
 ---
 
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: nginx-ingress
-#   annotations:
-#     kubernetes.io/ingress.class: "nginx"
-#     nginx.ingress.kubernetes.io/rewrite-target: /
-# spec:
-#   rules:
-#     - host: localhost
-#       http:
-#         paths:
-#           - path: /
-#             pathType: Prefix
-#             backend:
-#               service:
-#                 name: nginx-service
-#                 port:
-#                   number: 8080
-
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /test
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 8080
 ---
 
 apiVersion: apps/v1
@@ -59,7 +58,7 @@ metadata:
   labels:
     app: nginx
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: nginx
