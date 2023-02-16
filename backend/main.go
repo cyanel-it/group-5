@@ -16,10 +16,14 @@ import (
 )
 
 func connect() (*sql.DB, error) {
-	bin, err := ioutil.ReadFile("/run/secrets/db-password")
+	log.Print("coucou 1")
+	bin, err := ioutil.ReadFile("/var/run/secrets/db-password")
+	log.Print("coucou 2", string(bin), err)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
+	log.Print("Coucou 3")
 	return sql.Open("mysql", fmt.Sprintf("root:%s@tcp(db:3306)/example", string(bin)))
 }
 

@@ -1,3 +1,13 @@
+# apiVersion: v1
+# kind: ConfigMap
+# metadata: 
+#   name: mariadb-config
+# data: 
+#   MYSQL_DATABASE: example
+#   MYSQL_ROOT_PASSWORD: db-q5n2g
+
+# ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -29,11 +39,14 @@ spec:
       containers:
         - image: mariadb:10-focal
           name: mariadb
+          # envFrom:
+          #   - configMapRef:
+          #     name: mariadb-config
           env:
             - name: MYSQL_DATABASE
               value: example
-            - name: MYSQL_ROOT_PASSWORD_FILE
-              value: /run/secrets/db-password
+            - name: MYSQL_ROOT_PASSWORD
+              value: db-q5n2g # TODO : Transform into file
           ports:
             - containerPort: 3306
               name: mariadb
@@ -44,3 +57,4 @@ spec:
         - name: mariadb-storage
           persistentVolumeClaim:
             claimName: mariadb-claim
+        - name: mariadb-storage-secret

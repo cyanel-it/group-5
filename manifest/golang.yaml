@@ -1,0 +1,28 @@
+# DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      volumes:
+        - name: backend-pod-storage
+          hostPath:
+            type: File 
+            path: /db/password.txt
+      containers:
+      - image: golang-backend:latest
+        name: backend
+        # command: ["/bin/sh"]
+        # args: [ "-c", "while true; do sleep 100000; done"]
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: "/var/run/secrets/db-password"
+            name: backend-pod-storage
